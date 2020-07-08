@@ -28,9 +28,13 @@ DNS_SERVER=isp.domain.ru
 DNS_LOGIN=root
 DNS_PASSWORD=password
 DOMAIN_NAME=domain1.com
-DNS_SETNAME=subdomain1
-DNS_SETIP=5.5.5.5
+DNS_VALUE_TYPE=A
+DNS_VALUE=5.5.5.5
+DNS_TTL=600
 ```
+
+`DNS_VALUE_TYPE` - может быть типа `А` или `CNAME`
+`DNS_VALUE` - соответственно, либо равно `ip-адресу`, либо полному доменному имени с точкой на конце (например, api.domain.com.)
 
 > запускаем контейнер:
 {.is-success}
@@ -85,9 +89,13 @@ spec:
         - name: DOMAIN_NAME
           value: {{ .DOMAIN_NAME }}
         - name: DNS_SETNAME
-          value: {{ .SITE_NAME }}
-        - name: DNS_SETIP
-          value: {{ .LB_IP1 }}
+          value: {{ .DNS_SETNAME }}
+        - name: DNS_VALUE_TYPE
+          value: {{ .DNS_VALUE_TYPE }}
+        - name: DNS_VALUE
+          value: {{ .DNS_VALUE }}
+        - name: DNS_TTL
+          value: {{ .DNS_TTL }}
 
       restartPolicy: Never
   backoffLimit: 2
@@ -106,18 +114,26 @@ kubectl -n ${NS} wait --for=condition=complete --timeout=600s jobs/ispmgr-dns-jo
 после чего можно удалять весь деплой, либо же весь неймспейс полностью.
 
 # Сами методы
-создать запись:
+создать запись A:
 ```
 curl -ks "https://${DNS_SERVER}/ispmgr?authinfo=${DNS_LOGIN}:${DNS_PASSWORD}&out=sjson&sok=ok&func=domain.record.edit&plid=${DOMAIN_NAME}&ip=${DNS_SETIP}&name=${DNS_SETNAME}&rtype=a&ttl=3600"
 ```
+создать запись CNAME:
+```
+curl -ks "https://${DNS_SERVER}/ispmgr?authinfo=${DNS_LOGIN}:${DNS_PASSWORD}&out=sjson&sok=ok&func=domain.record.edit&plid=${DOMAIN_NAME}&ip=&name=${DNS_SETNAME}&domain=${DNS_VALUE}&rtype=${DNS_VALUE_TYPE}&ttl=${DNS_TTL}"
+```
 
-удалить запись:
+удалить запись A:
 ```
 curl -ks "https://${DNS_SERVER}/ispmgr?authinfo=${DNS_LOGIN}:${DNS_PASSWORD}&out=sjson&sok=ok&func=domain.record.delete&plid=${DOMAIN_NAME}&elid=${DNS_SETNAME}.${DOMAIN_NAME}.%20A%20%20${DNS_SETIP}"
 ```
 
-передаваемые переменные, думаю, комментировать смысла не имеет
+удалить запись CNAME:
+```
+curl -ks "https://${DNS_SERVER}/ispmgr?authinfo=${DNS_LOGIN}:${DNS_PASSWORD}&out=sjson&sok=ok&func=domain.record.delete&plid=${DOMAIN_NAME}&elid=${DNS_SETNAME}.${DOMAIN_NAME}.%20CNAME%20%20${DNS_VALUE}"
+```
 
 ##### Автор
- - **Vassiliy Yegorov** - *Initial work* - [vasyakrg](https://github.com/vasyakrg)
- - [сайт](vk.com/realmanual)
+- **Vassiliy Yegorov** - *Initial work* - [vasyakrg](https://github.com/vasyakrg)
+- [сайт](https://vk.com/realmanual)
+- [youtube](https://youtube.com/realmanual)
