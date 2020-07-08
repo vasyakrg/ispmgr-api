@@ -7,11 +7,11 @@ COM=$1
 
 case $COM in
     create)
-        echo "Create record ${DNS_SETNAME}.${DOMAIN_NAME} with IP:${DNS_SETIP}"
+        echo "Create ${DNS_VALUE_TYPE}-record ${DNS_SETNAME}.${DOMAIN_NAME} with VALUE=${DNS_VALUE}"
         create_record
     ;;
     delete)
-        echo "Detele record ${DNS_SETNAME}.${DOMAIN_NAME} with IP:${DNS_SETIP}"
+        echo "Detele ${DNS_VALUE_TYPE}-record ${DNS_SETNAME}.${DOMAIN_NAME} with VALUE=${DNS_VALUE}"
         delete_record
     ;;
     *)
